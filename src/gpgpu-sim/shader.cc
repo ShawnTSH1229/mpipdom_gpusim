@@ -1005,6 +1005,7 @@ void shader_core_ctx::issue_warp(register_set &pipe_reg_set,
   (*pipe_reg)->issue(active_mask, warp_id,
                      m_gpu->gpu_tot_sim_cycle + m_gpu->gpu_sim_cycle,
                      m_warp[warp_id]->get_dynamic_warp_id(),
+                     m_warp[warp_id]->get_original_wid(),/*GPGPULearning:ZSY_MPIPDOM*/
                      sch_id);  // dynamic instruction information
   m_stats->shader_cycle_distro[2 + (*pipe_reg)->active_count()]++;
   func_exec_inst(**pipe_reg);
@@ -1201,7 +1202,7 @@ void scheduler_unit::cycle() {
           warp(warp_id).ibuffer_flush();
         } else {
           valid_inst = true;
-          if (!m_scoreboard->checkCollision(warp_id, pI)) {
+          if (!m_scoreboard->checkCollision(warp_id,  m_shader->get_active_mask(warp_id, pI)/*GPGPULearning:ZSY_MPIPDOM*/, pI)) {
             SCHED_DPRINTF(
                 "Warp (warp_id %u, dynamic_warp_id %u) passes scoreboard\n",
                 (*iter)->get_warp_id(), (*iter)->get_dynamic_warp_id());
@@ -1943,7 +1944,8 @@ void ldst_unit::L1_latency_queue_cycle() {
               if (!still_pending) {
                 m_pending_writes[mf_next->get_inst().warp_id()].erase(
                     mf_next->get_inst().out[r]);
-                m_scoreboard->releaseRegister(mf_next->get_inst().warp_id(),
+                m_scoreboard->releaseRegister(mf_next->get_inst().original_wid(),
+                                              mf_next->get_inst().get_warp_active_mask(),
                                               mf_next->get_inst().out[r]);
                 m_core->warp_inst_complete(mf_next->get_inst());
               }
@@ -2432,12 +2434,14 @@ void ldst_unit::writeback() {
                 --m_pending_writes[m_next_wb.warp_id()][m_next_wb.out[r]];
             if (!still_pending) {
               m_pending_writes[m_next_wb.warp_id()].erase(m_next_wb.out[r]);
-              m_scoreboard->releaseRegister(m_next_wb.warp_id(),
+              m_scoreboard->releaseRegister(m_next_wb.original_wid(),
+                                            m_next_wb.get_warp_active_mask(),/*GPGPULearning:ZSY_MPIPDOM*/
                                             m_next_wb.out[r]);
               insn_completed = true;
             }
           } else {  // shared
-            m_scoreboard->releaseRegister(m_next_wb.warp_id(),
+            m_scoreboard->releaseRegister(m_next_wb.original_wid(),
+                                          m_next_wb.get_warp_active_mask(),/*GPGPULearning:ZSY_MPIPDOM*/
                                           m_next_wb.out[r]);
             insn_completed = true;
           }

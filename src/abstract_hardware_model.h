@@ -446,7 +446,7 @@ public:
           //GPGPULearning:ZSY_MPIPDOM:[END]
           m_type(STACK_ENTRY_TYPE_NORMAL){};
   };
-  
+
   //GPGPULearning:ZSY_MPIPDOM:[BEGIN]
   void launch(unsigned original_wid, simt_stack_entry new_stack_entry);
   unsigned int m_orig_warp_id;
@@ -1314,10 +1314,11 @@ class core_t {
     return reduction_storage[ctaid][barid];
   }
 
+  simt_stack **m_simt_stack;  // pdom based reconvergence context for each warp
+  
  protected:
   class gpgpu_sim *m_gpu;
   kernel_info_t *m_kernel;
-  simt_stack **m_simt_stack;  // pdom based reconvergence context for each warp
   class ptx_thread_info **m_thread;
   unsigned m_warp_size;
   unsigned m_warp_count;

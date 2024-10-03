@@ -2652,6 +2652,12 @@ unsigned gpgpu_context::translate_pc_to_ptxlineno(unsigned pc) {
   return ptx_line_number;
 }
 
+//GPGPULearning:ZSY_MPIPDOM:BEGIN
+unsigned long long gpgpu_context::clock() {
+  return the_gpgpusim->g_the_gpu->gpu_tot_sim_cycle + the_gpgpusim->g_the_gpu->gpu_sim_cycle;
+}
+//GPGPULearning:ZSY_MPIPDOM:END
+
 // ptxinfo parser
 
 extern std::map<unsigned, const char *> get_duplicate();

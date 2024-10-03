@@ -240,6 +240,7 @@ class shd_warp_t {
 
   unsigned get_dynamic_warp_id() const { return m_dynamic_warp_id; }
   unsigned get_warp_id() const { return m_warp_id; }
+  unsigned get_original_wid() const { return m_original_warp_id; }/*GPGPULearning:ZSY_MPIPDOM*/
 
   class shader_core_ctx * get_shader() { return m_shader; }
  private:
@@ -2225,8 +2226,11 @@ class shader_core_ctx : public core_t {
   read_only_cache *m_L1I;  // instruction cache
   int m_last_warp_fetched;
 
+ public:
   // decode/dispatch
   std::vector<shd_warp_t *> m_warp;  // per warp information array
+
+protected:
   barrier_set_t m_barriers;
   ifetch_buffer_t m_inst_fetch_buffer;
   std::vector<register_set> m_pipeline_reg;

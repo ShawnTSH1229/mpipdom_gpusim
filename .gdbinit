@@ -95,3 +95,4 @@ Usage: ptx_tids2pcs <tids> <tidslen> <shd_idx>
 <tidslen>: length of <tids> array
 <shd_idx>: shader core number
 end
+

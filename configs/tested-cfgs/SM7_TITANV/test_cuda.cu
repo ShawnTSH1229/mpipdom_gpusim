@@ -5,7 +5,7 @@
 
 __global__ void test_mpipdom_dualpath(int *data_in, int *data_out, int numElements) {
   int tid = threadIdx.x;
-  if (tid < 8) {
+  if (tid % 2 == 0) {
     data_out[tid] = data_in[tid] + 10000;
   } else {
     data_out[tid] = data_in[tid] + 100;
