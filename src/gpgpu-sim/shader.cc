@@ -3360,7 +3360,7 @@ int shader_core_ctx::find_idle_warp()
     {
         if(m_warp[wid]->done_exit())
         {
-          return i;
+          return wid;
         }
     }
     assert(false);
@@ -3373,7 +3373,7 @@ int shader_core_ctx::split_warp(int original_warp_id, simt_stack::simt_stack_ent
     address_type nwp_start_pc = entry.m_pc;
     unsigned nwp_cooperative_trd_array = m_warp[original_warp_id]->get_cta_id();
     int new_idle_wid = find_idle_warp();
-    const std::bitset<MAX_WARP_SIZE>& new_wp_active_mask = entry.active_mask;
+    const std::bitset<MAX_WARP_SIZE>& new_wp_active_mask = entry.m_active_mask;
     m_warp[new_idle_wid]->init(nwp_start_pc, nwp_cooperative_trd_array, new_idle_wid, new_wp_active_mask, original_warp_id, m_dynamic_warp_id);
 
     // launch new warp

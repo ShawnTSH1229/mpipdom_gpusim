@@ -253,7 +253,10 @@ class shd_warp_t {
 
   address_type m_next_pc;
   unsigned n_completed;  // number of threads in warp completed
+
+public:
   std::bitset<MAX_WARP_SIZE> m_active_threads;
+private:
 
   bool m_imiss_pending;
 
