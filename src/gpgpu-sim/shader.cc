@@ -1014,8 +1014,8 @@ void shader_core_ctx::issue_warp(register_set &pipe_reg_set,
   **pipe_reg = *next_inst;  // static instruction information
   (*pipe_reg)->issue(active_mask, warp_id,
                      m_gpu->gpu_tot_sim_cycle + m_gpu->gpu_sim_cycle,
-                     m_warp[warp_id]->get_dynamic_warp_id(),
                      m_warp[warp_id]->get_original_wid(),/*GPGPULearning:ZSY_MPIPDOM*/
+                     m_warp[warp_id]->get_dynamic_warp_id(),
                      sch_id);  // dynamic instruction information
   m_stats->shader_cycle_distro[2 + (*pipe_reg)->active_count()]++;
   func_exec_inst(**pipe_reg);
