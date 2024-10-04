@@ -910,22 +910,32 @@ void shader_core_ctx::fetch() {
             !m_scoreboard->pendingWrites(warp_id) &&
             !m_warp[warp_id]->done_exit()) {
           bool did_exit = false;
-          for (unsigned t = 0; t < m_config->warp_size; t++) {
-            unsigned tid = warp_id * m_config->warp_size + t;
-            if (m_threadState[tid].m_active == true) {
-              m_threadState[tid].m_active = false;
-              unsigned cta_id = m_warp[warp_id]->get_cta_id();
-              if (m_thread[tid] == NULL) {
-                register_cta_thread_exit(cta_id, m_kernel);
-              } else {
-                register_cta_thread_exit(cta_id,
-                                         &(m_thread[tid]->get_kernel()));
+          if (m_warp[warp_id]->get_original_wid() == m_warp[warp_id]->get_warp_id()) //GPGPULearning:ZSY_MPIPDOM
+          {
+            for (unsigned t = 0; t < m_config->warp_size; t++) {
+              unsigned tid = warp_id * m_config->warp_size + t;
+              if (m_threadState[tid].m_active == true) {
+                m_threadState[tid].m_active = false;
+                unsigned cta_id = m_warp[warp_id]->get_cta_id();
+                if (m_thread[tid] == NULL) {
+                  register_cta_thread_exit(cta_id, m_kernel);
+                } else {
+                  register_cta_thread_exit(cta_id,
+                                           &(m_thread[tid]->get_kernel()));
+                }
+                m_not_completed -= 1;
+                m_active_threads.reset(tid);
+                did_exit = true;
               }
-              m_not_completed -= 1;
-              m_active_threads.reset(tid);
-              did_exit = true;
             }
           }
+          //GPGPULearning:ZSY_MPIPDOM:BEGIN
+          else
+          {
+            did_exit = true;
+          }
+          //GPGPULearning:ZSY_MPIPDOM:END
+
           if (did_exit) m_warp[warp_id]->set_done_exit();
           --m_active_warps;
           assert(m_active_warps >= 0);
@@ -984,7 +994,7 @@ void shader_core_ctx::fetch() {
 }
 
 void exec_shader_core_ctx::func_exec_inst(warp_inst_t &inst) {
-  execute_warp_inst_t(inst);
+  execute_warp_inst_t(inst, inst.original_wid()); //GPGPULearning:ZSY_MPIPDOM
   if (inst.is_load() || inst.is_store()) {
     inst.generate_mem_accesses();
     // inst.print_m_accessq();
@@ -3384,6 +3394,9 @@ int shader_core_ctx::split_warp(int original_warp_id, simt_stack::simt_stack_ent
     m_simt_stack[new_idle_wid]->launch(original_warp_id, entry);
 
     m_warp[original_warp_id]->m_active_threads &= ~(entry.m_active_mask);
+
+    ++m_dynamic_warp_id;
+    ++m_active_warps;
 }
 //GPGPULearning:ZSY_MPIPDOM:[END]
 
