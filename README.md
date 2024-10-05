@@ -10,3 +10,9 @@ We implemented the MP IPDOM in this project based on the [original paper](https:
 
 Following the official [GPGPU-SIM document](https://github.com/gpgpu-sim/gpgpu-sim_distribution).
 
+All modifications are comment with 'GPGPULearning:ZSY_MPIPDOM'. You can search my modification using that key word in the source code. Here is an example of my modification:
+
+<p align="left">
+    <img src="/resource/example.png" width="90%" height="90%">
+</p>
+
