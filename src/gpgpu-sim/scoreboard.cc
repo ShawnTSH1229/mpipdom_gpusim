@@ -180,10 +180,14 @@ bool Scoreboard::checkCollision(unsigned wid, active_mask_t msk/*GPGPULearning:Z
       if (reserved_msk.any())
       {
         return true;
+        printf("[MP_IPDOM_DEBUG]: Collision\n");
       }
     }
     // GPGPULearning:ZSY_MPIPDOM:[END]
   }
+
+  printf("[MP_IPDOM_DEBUG]: No Collision\n");
+  
   return false;
 }
 

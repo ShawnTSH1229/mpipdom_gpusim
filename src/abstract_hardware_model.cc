@@ -1096,17 +1096,17 @@ void simt_stack::update(simt_mask_t &thread_done, addr_vector_t &next_pc,
     }
 
     divergent_paths[tmp_next_pc] = tmp_active_mask;
-    printf("[MP_IPDOM_DEBUG]: Divergent Path Index %d, Active Mask %x\n", num_divergent_paths, tmp_active_mask.to_ulong());//GPGPULearning:ZSY_MPIPDOM
+    printf("[MP_IPDOM_DEBUG]: Active Mask %x\n", tmp_active_mask.to_ulong());//GPGPULearning:ZSY_MPIPDOM
     num_divergent_paths++;
   }
 
-  printf("[MP_IPDOM_DEBUG]: Update Debug Pos 1\n");//GPGPULearning:ZSY_MPIPDOM
+  //printf("[MP_IPDOM_DEBUG]: Update Debug Pos 1\n");//GPGPULearning:ZSY_MPIPDOM
 
   address_type not_taken_pc = next_inst_pc + next_inst_size;
   assert(num_divergent_paths <= 2);
   for (unsigned i = 0; i < num_divergent_paths; i++) {
 
-    printf("[MP_IPDOM_DEBUG]: Update Debug Pos 2\n");//GPGPULearning:ZSY_MPIPDOM
+    //printf("[MP_IPDOM_DEBUG]: Update Debug Pos 2\n");//GPGPULearning:ZSY_MPIPDOM
 
     address_type tmp_next_pc = null_pc;
     simt_mask_t tmp_active_mask;
@@ -1155,7 +1155,7 @@ void simt_stack::update(simt_mask_t &thread_done, addr_vector_t &next_pc,
       return;
     }
 
-    printf("[MP_IPDOM_DEBUG]: Update Debug Pos 3\n");//GPGPULearning:ZSY_MPIPDOM
+    //printf("[MP_IPDOM_DEBUG]: Update Debug Pos 3\n");//GPGPULearning:ZSY_MPIPDOM
 
     // discard the new entry if its PC matches with reconvergence PC
     // that automatically reconverges the entry
@@ -1283,7 +1283,7 @@ void simt_stack::update(simt_mask_t &thread_done, addr_vector_t &next_pc,
       }
     }
 
-    printf("[MP_IPDOM_DEBUG]: Update Debug Pos 5\n");//GPGPULearning:ZSY_MPIPDOM
+    //printf("[MP_IPDOM_DEBUG]: Update Debug Pos 5\n");//GPGPULearning:ZSY_MPIPDOM
 
     // discard the new entry if its PC matches with reconvergence PC
     if (warp_diverged && tmp_next_pc == new_recvg_pc) continue;
@@ -1318,7 +1318,7 @@ void simt_stack::update(simt_mask_t &thread_done, addr_vector_t &next_pc,
   if (warp_diverged) {
     m_gpu->gpgpu_ctx->stats->ptx_file_line_stats_add_warp_divergence(top_pc, 1);
   }
-  printf("[MP_IPDOM_DEBUG]: Update Debug Pos 5\n");
+  //printf("[MP_IPDOM_DEBUG]: Update Debug Pos 5\n");
 }
 
 void core_t::execute_warp_inst_t(warp_inst_t &inst, unsigned warpId) {
@@ -1342,6 +1342,7 @@ bool core_t::ptx_thread_done(unsigned hw_thread_id) const {
 void core_t::updateSIMTStack(unsigned warpId, warp_inst_t *inst) {
   simt_mask_t thread_done;
   addr_vector_t next_pc;
+  addr_t pre_pc = 0;/*GPGPULearning:ZSY_MPIPDOM */
   unsigned wtid = inst->original_wid()/*GPGPULearning:ZSY_MPIPDOM */ * m_warp_size;
   for (unsigned i = 0; i < m_warp_size; i++) {
     if (ptx_thread_done(wtid + i)) {
@@ -1351,7 +1352,14 @@ void core_t::updateSIMTStack(unsigned warpId, warp_inst_t *inst) {
       if (inst->reconvergence_pc == RECONVERGE_RETURN_PC)
         inst->reconvergence_pc = get_return_pc(m_thread[wtid + i]);
       next_pc.push_back(m_thread[wtid + i]->get_pc());
-      printf("[MP_IPDOM_DEBUG]: updateSIMTStack Next PC %d\n",m_thread[wtid + i]->get_pc());//GPGPULearning:ZSY_MPIPDOM
+
+      //GPGPULearning:ZSY_MPIPDOM:BEGIN
+      if(pre_pc != m_thread[wtid + i]->get_pc())
+      {
+        printf("[MP_IPDOM_DEBUG]: updateSIMTStack Next PC %d\n", m_thread[wtid + i]->get_pc());
+        pre_pc = m_thread[wtid + i]->get_pc();
+      }
+      //GPGPULearning:ZSY_MPIPDOM:END
     }
   }
   m_simt_stack[warpId]->update(thread_done, next_pc, inst->reconvergence_pc,
