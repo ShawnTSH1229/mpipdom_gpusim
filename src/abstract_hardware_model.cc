@@ -1220,6 +1220,8 @@ void simt_stack::update(simt_mask_t &thread_done, addr_vector_t &next_pc,
 
             real_rt_table.pop_back();
         }
+
+        return;
     }
     //GPGPULearning:ZSY_MPIPDOM:[END]
 
